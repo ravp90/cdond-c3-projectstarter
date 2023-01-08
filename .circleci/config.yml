@@ -107,6 +107,8 @@ jobs:
           command: |
             cd frontend
             npm install
+            npm update minimist --depth 4
+            npm update loader-utils --depth 2
             npm audit fix --audit-level=critical --force
             npm audit --audit-level=critical
 
@@ -122,6 +124,7 @@ jobs:
           command: |
             cd backend
             npm install
+            npm update mkdirp --depth 2
             npm audit fix --audit-level=critical --force
             npm audit --audit-level=critical
 
