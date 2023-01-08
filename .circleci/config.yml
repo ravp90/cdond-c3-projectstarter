@@ -220,7 +220,7 @@ jobs:
                curl --insecure https://kvdb.io/K3n15ea1qdEUb6azkq6sVp/migration_${CIRCLE_WORKFLOW_ID:0:7}  -d '1'
             fi
       - destroy-environment:
-            id: "${CIRCLE_WORKFLOW_ID}"
+          id: "${CIRCLE_WORKFLOW_ID}"
 
   deploy-frontend:
     docker:
@@ -255,7 +255,7 @@ jobs:
             tar -czvf artifact-"${CIRCLE_WORKFLOW_ID:0:7}".tar.gz dist
             aws s3 cp dist s3://udapeople-${CIRCLE_WORKFLOW_ID:0:7} --recursive
       - destroy-environment:
-            id: "${CIRCLE_WORKFLOW_ID}"
+          id: "${CIRCLE_WORKFLOW_ID}"
                  
   deploy-backend:
     docker:
@@ -270,14 +270,19 @@ jobs:
       - run:
           name: Install dependencies
           command: |
+            apk add --update tar
+            apk add --update gzip 
             apk add --update ansible
+            apk add --update nodejs
             pip install awscli
       - run:
           name: Deploy backend
           command: |
-            # your code here
-      # Here's where you will add some code to rollback on failure  
-
+            npm install
+            pm2 stop default
+            pm2 start npm -- start
+      - destroy-environment:
+          id: "${CIRCLE_WORKFLOW_ID}"
 #   smoke-test:
 #     docker:
 #       # Lightweight Docker image 
