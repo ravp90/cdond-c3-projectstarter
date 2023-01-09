@@ -259,75 +259,66 @@ jobs:
                  
   deploy-backend:
     docker:
-      - image: python:3.7-alpine3.11
+      - image: cimg/python:3.7-node
     steps:
       - checkout
       - add_ssh_keys:
-          fingerprints:
-            - "de:80:4c:c3:ad:8f:9b:c3:ae:e5:b4:0d:b9:ec:ac:47"
+          fingerprints: ["67:0a:4f:1d:2b:ff:d0:b1:59:d1:24:75:b0:06:a7:02"]
       - attach_workspace:
-          at: /tmp/.circleci/ansible
+          at: /tmp/workspace
       - run:
           name: Install dependencies
           command: |
-            apk add --update tar
-            apk add --update gzip 
-            apk add --update ansible
-            apk add --update nodejs npm
-            pip install awscli
+            sudo apt update
+            sudo apt install software-properties-common -y
+            sudo add-apt-repository --yes --update ppa:ansible/ansible
+            sudo apt install ansible -y
+      - restore_cache:
+          keys: [backend-build]
       - run:
           name: Deploy backend
+          working_directory: backend
           command: |
-            cd backend
-            npm install
             npm run build
             cd ..
             tar -C backend -czvf artifact.tar.gz .
-            mkdir -p ~/project/.circleci/ansible/roles/deploy/files/
-            mv artifact.tar.gz .circleci/ansible/roles/deploy/files/artifact.tar.gz
             cd .circleci/ansible
-            ansible-playbook -i inventory.txt deploy-backend.yml
+            cat /tmp/workspace/inventory.txt
+            ansible-playbook -i /tmp/workspace/inventory.txt deploy-backend.yml
       - destroy-environment:
           id: "${CIRCLE_WORKFLOW_ID}"
   smoke-test:
     docker:
-      - image: python:3.7-alpine3.11
+      - image: cimg/base:stable
     steps:
       - checkout
-      - run:
-          name: Install dependencies
-          command: |
-            apk add --update curl
-            apk add --update tar
-            apk add --update gzip 
-            apk add --update ansible
-            apk add --update nodejs npm
-            pip install awscli
+      - attach_workspace:
+          at: /tmp/workspace
       - run:
           name: Backend smoke test.
           command: |
-            export BACKEND_IP=$(aws ec2 describe-instances --query 'Reservations[*].Instances[*].PublicIpAddress' --output text)
+            export BACKEND_IP=$(sed -n '2p' /tmp/workspace/inventory.txt)
             export API_URL="http://${BACKEND_IP}:3030"
             echo "${API_URL}"
             if curl "${API_URL}/api/status" | grep "ok"
             then
-                return 0
+              exit 0
             else
-                return 1
+              exit 1
             fi
       - run:
           name: Frontend smoke test.
           command: |
-              URL="http://udapeople-${CIRCLE_WORKFLOW_ID:0:7}.s3-website-us-east-1.amazonaws.com/#/employees"            
-              echo ${URL} 
-              if curl -s ${URL} | grep "Welcome"
-              then
-                  # Change this to 0 after the job fails
-                return 1
-              else
-                return 1
-              fi
-      # Here's where you will add some code to rollback on failure  
+            URL="http://udapeople-${CIRCLE_WORKFLOW_ID:0:7}.s3-website-us-east-1.amazonaws.com/#/employees"
+            echo ${URL}
+            if curl -s ${URL} | grep "Welcome"
+            then
+              exit 0
+            else
+              exit 1
+            fi
+      - destroy-environment:
+          id: "${CIRCLE_WORKFLOW_ID}"
 
 #   cloudfront-update:
 #     docker:
