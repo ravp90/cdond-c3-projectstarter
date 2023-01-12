@@ -259,32 +259,34 @@ jobs:
                  
   deploy-backend:
     docker:
-      - image: cimg/python:3.7-node
+      - image: python:3.7-alpine3.11
     steps:
       - checkout
       - add_ssh_keys:
-          fingerprints: ["67:0a:4f:1d:2b:ff:d0:b1:59:d1:24:75:b0:06:a7:02"]
+          fingerprints:
+            - "de:80:4c:c3:ad:8f:9b:c3:ae:e5:b4:0d:b9:ec:ac:47"
       - attach_workspace:
-          at: /tmp/workspace
+          at: /tmp/.circleci/ansible
       - run:
           name: Install dependencies
           command: |
-            sudo apt update
-            sudo apt install software-properties-common -y
-            sudo add-apt-repository --yes --update ppa:ansible/ansible
-            sudo apt install ansible -y
-      - restore_cache:
-          keys: [backend-build]
+            apk add --update tar
+            apk add --update gzip 
+            apk add --update ansible
+            apk add --update nodejs npm
+            pip install awscli
       - run:
           name: Deploy backend
-          working_directory: backend
           command: |
+            cd backend
+            npm install
             npm run build
             cd ..
             tar -C backend -czvf artifact.tar.gz .
+            mkdir -p ~/project/.circleci/ansible/roles/deploy/files/
+            mv artifact.tar.gz .circleci/ansible/roles/deploy/files/artifact.tar.gz
             cd .circleci/ansible
-            cat /tmp/workspace/inventory.txt
-            ansible-playbook -i /tmp/workspace/inventory.txt deploy-backend.yml
+            ansible-playbook -i inventory.txt deploy-backend.yml
       - destroy-environment:
           id: "${CIRCLE_WORKFLOW_ID}"
   smoke-test:
