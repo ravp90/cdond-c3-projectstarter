@@ -1,16 +1,38 @@
-
 ---
-- name: Creates backend directory
-  file:
-    path: ~/backend/
-    state: directory
+- name: "update apt."
+  become: true
+  apt:
+    update_cache: yes
 
-- name: Copy and unarchive artifact
+- name: "upgrade apt"
+  become: true
+  apt:
+    upgrade: yes
+
+- name: install deps
+  become: true
+  apt:
+    name: ['nodejs', 'npm']
+    state: latest
+    update_cache: yes
+
+- name: install pm2
+  become: true
+  npm:
+    name: pm2
+    global: yes
+    state: latest
+    production: yes
+
+- name: extract artifact
+  become: true
   unarchive:
-    src: ../../artifact.tar.gz
-    dest: ~/backend
+    src: files/artifact.tar.gz
+    dest: .
 
-- name: Start PM2
+- name: start app
+  become: true
   shell: |
-    cd ~/backend/dist
-    pm2 start main.js
+    npm install
+    pm2 stop default
+    pm2 start npm -- start
