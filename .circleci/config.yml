@@ -163,9 +163,10 @@ jobs:
               --query 'Reservations[*].Instances[*].PublicIpAddress' \
               --output text >> inventory
       - persist_to_workspace:
-          root: ~/
+          root: /tmp/workspace
           paths:
             - project/.circleci/ansible/inventory.txt
+            - project/.circleci/ansible/*
       - destroy-environment:
           id: ${CIRCLE_WORKFLOW_ID:0:7}     
 
@@ -179,7 +180,7 @@ jobs:
             - "de:80:4c:c3:ad:8f:9b:c3:ae:e5:b4:0d:b9:ec:ac:47"
             - "74:08:dd:db:96:4c:41:a2:28:e8:ec:a4:41:12:d2:0f"
       - attach_workspace:
-          at: /tmp/.circleci/ansible
+          at: /tmp/workspace
       - run:
           name: Install dependencies
           command: |
@@ -188,7 +189,7 @@ jobs:
       - run:
           name: Configure server
           command: |
-            ansible-playbook -i /tmp/.circleci/ansible/inventory.txt .circleci/ansible/configure-server.yml
+            ansible-playbook -i inventory.txt .circleci/ansible/configure-server.yml
       - destroy-environment:
           id: "${CIRCLE_WORKFLOW_ID}"
 
@@ -268,7 +269,7 @@ jobs:
             - "de:80:4c:c3:ad:8f:9b:c3:ae:e5:b4:0d:b9:ec:ac:47"
             - "74:08:dd:db:96:4c:41:a2:28:e8:ec:a4:41:12:d2:0f"
       - attach_workspace:
-          at: /tmp/.circleci/ansible
+          at: /tmp/workspace
       - run:
           name: Install dependencies
           command: |
