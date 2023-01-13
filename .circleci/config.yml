@@ -162,10 +162,13 @@ jobs:
             aws ec2 describe-instances \
               --query 'Reservations[*].Instances[*].PublicIpAddress' \
               --output text >> inventory
+            cat inventory.txt
+            cd ~
+            dir
       - persist_to_workspace:
           root: ~/
           paths:
-            - .circleci/ansible/*
+            - project/.circleci/ansible/*
       - destroy-environment:
           id: ${CIRCLE_WORKFLOW_ID:0:7}     
 
@@ -188,7 +191,7 @@ jobs:
       - run:
           name: Configure server
           command: |
-            ansible-playbook -i .circleci/ansible/inventory.txt .circleci/ansible/configure-server.yml
+            ansible-playbook -i project/.circleci/ansible/inventory.txt .circleci/ansible/configure-server.yml
       - destroy-environment:
           id: "${CIRCLE_WORKFLOW_ID}"
 
