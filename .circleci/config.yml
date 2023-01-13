@@ -162,7 +162,7 @@ jobs:
             aws ec2 describe-instances \
               --query 'Reservations[*].Instances[*].PublicIpAddress' \
               --output text >> inventory
-            cat inventory.txt
+            cat inventory
             cd ~
             dir
       - persist_to_workspace:
