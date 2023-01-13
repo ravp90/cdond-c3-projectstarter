@@ -164,7 +164,7 @@ jobs:
               --output text >> inventory
             cat inventory
             cd ~
-            dir
+            dir project/.circleci/ansible
       - persist_to_workspace:
           root: ~/
           paths:
@@ -188,6 +188,9 @@ jobs:
           command: |
             apk add --update ansible
             pip install awscli
+            dir
+            cd ~
+            dir
       - run:
           name: Configure server
           command: |
