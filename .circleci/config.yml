@@ -167,7 +167,7 @@ jobs:
             mkdir tmp
             dir project/.circleci/ansible
       - persist_to_workspace:
-          root: ~/tmp/
+          root: /tmp/workspace/
           paths:
             - project/.circleci/ansible/*
       - destroy-environment:
@@ -182,7 +182,7 @@ jobs:
           fingerprints:
             - "74:08:dd:db:96:4c:41:a2:28:e8:ec:a4:41:12:d2:0f"
       - attach_workspace:
-          at: ~/tmp/
+          at: /tmp/workspace/
       - run:
           name: Install dependencies
           command: |
@@ -196,7 +196,7 @@ jobs:
       - run:
           name: Configure server
           command: |
-            ansible-playbook -i ~/tmp/project/.circleci/ansible/inventory.txt ~/tmp/project/.circleci/ansible/configure-server.yml
+            ansible-playbook -i /tmp/workspace/project/.circleci/ansible/inventory.txt /tmp/workspace/project/.circleci/ansible/configure-server.yml
       - destroy-environment:
           id: "${CIRCLE_WORKFLOW_ID}"
 
@@ -215,7 +215,7 @@ jobs:
       - restore_cache:
           keys: [backend-build]
       - attach_workspace:
-          at: ~/tmp/
+          at: /tmp/workspace/
       - run:
           name: Run migrations
           command: |
@@ -224,7 +224,7 @@ jobs:
       - run:
           name: Send migration results to memstash
           command: |
-            if grep -q "success." ~/tmp/project/backend/migrations_dump.txt
+            if grep -q "success." /tmp/workspace/project/backend/migrations_dump.txt
             then
                curl --insecure https://kvdb.io/K3n15ea1qdEUb6azkq6sVp/migration_${CIRCLE_WORKFLOW_ID:0:7}  -d '1'
             fi
@@ -244,7 +244,7 @@ jobs:
             yum install -y nodejs
             node --version
       - attach_workspace:
-          at: ~/tmp/
+          at: /tmp/workspace/
       - run:
           name: Get backend url
           command: |
@@ -275,7 +275,7 @@ jobs:
       - restore_cache:
           keys: [backend-build]
       - attach_workspace:
-          at: ~/tmp/
+          at: /tmp/workspace/
       - run:
           name: Install dependencies
           command: |
@@ -295,8 +295,8 @@ jobs:
             cd .circleci/ansible
             echo "Contents  of the inventory.txt file is"
             cat inventory.txt
-            cat ~/tmp/project/.circleci/ansible/inventory.txt
-            ansible-playbook -i ~/tmp/project/.circleci/ansible/inventory.txt deploy-backend.yml
+            cat /tmp/workspace/project/.circleci/ansible/inventory.txt
+            ansible-playbook -i /tmp/workspace/project/.circleci/ansible/inventory.txt deploy-backend.yml
       - destroy-environment:
           id: "${CIRCLE_WORKFLOW_ID}"
   smoke-test:
