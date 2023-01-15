@@ -193,6 +193,7 @@ jobs:
             ls
             cd ~
             ls project/.circleci/ansible
+            cat project/.circleci/ansible/inventory.txt
       - run:
           name: Configure server
           command: |
