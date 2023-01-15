@@ -166,8 +166,8 @@ jobs:
           root: ~/
           paths:
             - project/.circleci/ansible/inventory.txt
-      - destroy-environment:
-          id: ${CIRCLE_WORKFLOW_ID:0:7}     
+      # - destroy-environment:
+      #     id: ${CIRCLE_WORKFLOW_ID:0:7}     
 
   configure-infrastructure:
     docker:
@@ -176,7 +176,7 @@ jobs:
       - checkout
       - add_ssh_keys:
           fingerprints:
-            - "	3f:d3:d6:12:47:a0:16:3f:a3:d7:c4:8d:1d:79:13:e3"
+            - "ca:b8:5b:8d:95:42:71:4e:eb:b2:5a:6a:78:87:2f:c4"
       - attach_workspace:
           at: ~/
       - run:
@@ -269,7 +269,7 @@ jobs:
       - checkout
       - add_ssh_keys:
           fingerprints:
-            - "	3f:d3:d6:12:47:a0:16:3f:a3:d7:c4:8d:1d:79:13:e3"
+            - "ca:b8:5b:8d:95:42:71:4e:eb:b2:5a:6a:78:87:2f:c4"
       - run:
           name: Install dependencies
           command: |
