@@ -26,7 +26,6 @@ commands:
           when: on_fail
           command: |
             SUCCESS = $(curl --insecure https://kvdb.io/K3n15ea1qdEUb6azkq6sVp/migration_<<parameters.workflow_id>>)
-            SUCCESS = 1
             if(( $SUCCESS==1 )); 
             then
               cd ~/project/backend
@@ -393,8 +392,8 @@ workflows:
           requires: [run-migrations]
       - deploy-backend:
           requires: [run-migrations]
-      # - smoke-test:
-      #     requires: [deploy-backend, deploy-frontend]
+      - smoke-test:
+          requires: [deploy-backend, deploy-frontend]
       # - cloudfront-update:
       #     requires: [smoke-test]
       # - cleanup:
