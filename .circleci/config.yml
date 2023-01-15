@@ -184,16 +184,10 @@ jobs:
           command: |
             apk add --update ansible
             pip install awscli
-            ls
-            cd ..
-            ls
-            cd ~
-            ls project/.circleci/ansible
-            cat project/.circleci/ansible/inventory.txt
-            cd project/.circleci/ansible
       - run:
           name: Configure server
           command: |
+            cd .circleci/ansible
             ansible-playbook -i inventory.txt configure-server.yml
       - destroy-environment:
           id: "${CIRCLE_WORKFLOW_ID}"
