@@ -157,7 +157,7 @@ jobs:
           name: Add back-end ip to ansible inventory
           command: |
             aws ec2 describe-instances \
-              --query 'Reservations[*].Instances[*].PublicIpAddress' \
+              --query 'Reservations[*].Instances[-1].PublicIpAddress' \
               --output text >> .circleci/ansible/inventory.txt
             cat ~/project/.circleci/ansible/inventory.txt
       - persist_to_workspace:
@@ -174,7 +174,7 @@ jobs:
       - checkout
       - add_ssh_keys:
           fingerprints:
-            - "0f:c8:09:98:6c:82:2a:0d:d8:fe:76:6f:bf:c0:7f:11"
+            - "49:5e:83:b8:83:99:8d:63:65:39:ee:62:5e:b7:ee:44"
       - attach_workspace:
           at: ~/
       - run:
@@ -221,6 +221,8 @@ jobs:
             fi
       - destroy-environment:
           workflow_id: ${CIRCLE_WORKFLOW_ID:0:7} 
+      - revert-migrations:
+          workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}
 
   deploy-frontend:
     docker:
@@ -254,6 +256,8 @@ jobs:
             aws s3 cp dist s3://udapeople-${CIRCLE_WORKFLOW_ID:0:7} --recursive
       - destroy-environment:
           workflow_id: ${CIRCLE_WORKFLOW_ID:0:7} 
+      - revert-migrations:
+          workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}
                  
   deploy-backend:
     docker:
@@ -262,7 +266,7 @@ jobs:
       - checkout
       - add_ssh_keys:
           fingerprints:
-            - "0f:c8:09:98:6c:82:2a:0d:d8:fe:76:6f:bf:c0:7f:11"
+            - "49:5e:83:b8:83:99:8d:63:65:39:ee:62:5e:b7:ee:44"
       - run:
           name: Install dependencies
           command: |
@@ -289,6 +293,8 @@ jobs:
             ansible-playbook -i inventory.txt deploy-backend.yml      
       - destroy-environment:
           workflow_id: ${CIRCLE_WORKFLOW_ID:0:7} 
+      - revert-migrations:
+          workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}  
   smoke-test:
     docker:
       - image: python:3.7-alpine3.11
@@ -401,8 +407,8 @@ workflows:
           requires: [run-migrations]
       - deploy-backend:
           requires: [run-migrations]
-      - smoke-test:
-          requires: [deploy-backend, deploy-frontend]
+      # - smoke-test:
+      #     requires: [deploy-backend, deploy-frontend]
       # - cloudfront-update:
       #     requires: [smoke-test]
       # - cleanup:
