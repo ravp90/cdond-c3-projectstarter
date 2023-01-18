@@ -25,8 +25,9 @@ commands:
           name: Revert migrations
           when: on_fail
           command: |
-            SUCCESS = $(curl --insecure https://kvdb.io/K3n15ea1qdEUb6azkq6sVp/migration_<<parameters.workflow_id>>)
-            if(( $SUCCESS==1 )); 
+            # SUCCESS = $(curl --insecure https://kvdb.io/K3n15ea1qdEUb6azkq6sVp/migration_<<parameters.workflow_id>>)
+            # if(( $SUCCESS==1 )); 
+            if grep -q "has been executed successfully." ~/project/backend/migrations_dump.txt
             then
               cd ~/project/backend
               npm install
@@ -399,8 +400,8 @@ workflows:
           requires: [run-migrations]
       - deploy-backend:
           requires: [run-migrations]
-      # - smoke-test:
-      #     requires: [deploy-backend, deploy-frontend]
+      - smoke-test:
+          requires: [deploy-backend, deploy-frontend]
       # - cloudfront-update:
       #     requires: [smoke-test]
       # - cleanup:
